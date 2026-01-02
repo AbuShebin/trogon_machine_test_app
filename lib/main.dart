@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C63FF)),
         useMaterial3: true,
-        fontFamily: 'Inter',
+        fontFamily: 'Poppins',
       ),
       initialRoute: onboardingCompleted ? '/home' : '/onboarding',
       getPages: [

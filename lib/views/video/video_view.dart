@@ -71,7 +71,9 @@ class _VideoViewState extends State<VideoView> {
         final videoData = controller.videoData.value;
         final selectedVideo = controller.selectedVideo.value;
 
-        if (videoData == null) return const SizedBox();
+        if (videoData == null || videoData.videos.isEmpty) {
+          return const Center(child: Text('No videos available.'));
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,12 +86,37 @@ class _VideoViewState extends State<VideoView> {
                     _videoPlayerController != null &&
                         _videoPlayerController!.value.isInitialized
                     ? Stack(
-                        alignment: Alignment.bottomCenter,
+                        alignment: Alignment.center,
                         children: [
                           VideoPlayer(_videoPlayerController!),
-                          VideoProgressIndicator(
-                            _videoPlayerController!,
-                            allowScrubbing: true,
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _videoPlayerController!.value.isPlaying
+                                    ? _videoPlayerController!.pause()
+                                    : _videoPlayerController!.play();
+                              });
+                            },
+                            child: CircleAvatar(
+                              backgroundColor: Colors.black26,
+                              radius: 30,
+                              child: Icon(
+                                _videoPlayerController!.value.isPlaying
+                                    ? Icons.pause
+                                    : Icons.play_arrow,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: VideoProgressIndicator(
+                              _videoPlayerController!,
+                              allowScrubbing: true,
+                            ),
                           ),
                         ],
                       )

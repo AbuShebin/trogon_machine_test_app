@@ -8,60 +8,62 @@ class StreakView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(StreakController());
+    final controller = Get.find<StreakController>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Learning Streak'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-        if (controller.error.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(controller.error.value),
-                ElevatedButton(
-                  onPressed: controller.retry,
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final data = controller.streakData.value;
-        if (data == null) return const SizedBox();
-
-        return Column(
-          children: [
-            _buildStreakHeader(data),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                itemCount: data.days.length,
-                itemBuilder: (context, index) {
-                  final day = data.days[index];
-                  final isLeft = index % 2 == 0;
-
-                  return _buildPathNode(
-                    day,
-                    isLeft,
-                    index == data.days.length - 1,
-                  );
-                },
+      if (controller.error.isNotEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(controller.error.value),
+              ElevatedButton(
+                onPressed: controller.retry,
+                child: const Text('Retry'),
               ),
-            ),
-          ],
+            ],
+          ),
         );
-      }),
-    );
+      }
+
+      final data = controller.streakData.value;
+      if (data == null) {
+        return const Center(child: Text('Start learning to see your streak!'));
+      }
+
+      return Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: Text(
+              'Learning Streak',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+          ),
+          _buildStreakHeader(data),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              itemCount: data.days.length,
+              itemBuilder: (context, index) {
+                final day = data.days[index];
+                final isLeft = index % 2 == 0;
+
+                return _buildPathNode(
+                  day,
+                  isLeft,
+                  index == data.days.length - 1,
+                );
+              },
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildStreakHeader(dynamic data) {

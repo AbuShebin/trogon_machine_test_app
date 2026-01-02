@@ -10,15 +10,13 @@ class OnboardingController extends GetxController {
 
   final List<OnboardingContent> contents = [
     OnboardingContent(
-      image:
-          'https://img.freepik.com/free-vector/smarter-learning-concept-illustration_114360-7055.jpg', // Placeholder
+      image: 'assets/images/onboarding1.png',
       title: 'Smarter Learning Starts Here',
       description:
           'Unlock your potential with our expert-led courses and interactive learning experience.',
     ),
     OnboardingContent(
-      image:
-          'https://img.freepik.com/free-vector/learn-practice-succeed-concept-illustration_114360-7056.jpg', // Placeholder
+      image: 'assets/images/onboarding2.png',
       title: 'Learn. Practice. Succeed.',
       description:
           'Real-world skills, practical exercises, and personalized feedback to help you excel.',
