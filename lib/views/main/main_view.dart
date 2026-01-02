@@ -24,6 +24,7 @@ class MainView extends StatelessWidget {
     ];
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Obx(
         () => IndexedStack(
           index: controller.selectedIndex.value,

@@ -468,12 +468,16 @@ class HomeView extends StatelessWidget {
 
                 //community
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.orange.shade300, Colors.orange.shade600],
-                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 9,
+                        offset: const Offset(0, 9),
+                      ),
+                    ],
+                    color: AppColors.cardBackground,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Column(
@@ -482,7 +486,7 @@ class HomeView extends StatelessWidget {
                       Text(
                         controller.homeData.value?.community.name ?? "",
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -490,9 +494,17 @@ class HomeView extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         controller.homeData.value?.community.description ?? "",
-                        style: const TextStyle(color: Colors.white70),
+                        style: const TextStyle(color: Colors.black),
                       ),
                       const SizedBox(height: 16),
+                      Center(
+                        child: CustomElevatedButton(
+                          text: "Join Discussion",
+                          onPressed: () {},
+                          height: h * 1,
+                          width: w * 0.8,
+                        ),
+                      ),
                       Row(
                         children: [
                           ...controller
@@ -516,7 +528,7 @@ class HomeView extends StatelessWidget {
                           Text(
                             '+${controller.homeData.value?.community.activeMembers} Members',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
