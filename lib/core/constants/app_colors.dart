@@ -17,5 +17,7 @@ class AppColors {
   static const Color activeCourseGradient1 = Color(0xFFF2E5F87);
   static const Color activeCourseGradient2 = Color(0xFF2F49C8);
   static const Color activeCourseProgress = Color(0xFFFDB918);
+    static const Color liveSectionCard = Color(0xFFFDB918);
+
 
 }
