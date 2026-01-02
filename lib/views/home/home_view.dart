@@ -2,57 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../core/constants/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(HomeController());
+    final controller = Get.find<HomeController>();
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-        if (controller.error.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(controller.error.value),
-                ElevatedButton(
-                  onPressed: controller.retry,
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final data = controller.homeData.value;
-        if (data == null) return const SizedBox();
-
-        return RefreshIndicator(
-          onRefresh: controller.fetchHomeData,
-          child: CustomScrollView(
-            slivers: [
-              _buildHeader(data),
-              _buildActiveCourse(data),
-              _buildCategories(controller),
-              _buildPopularCourses(data),
-              _buildLiveSession(data),
-              _buildCommunity(data),
-              _buildTestimonials(data),
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+      if (controller.error.isNotEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(controller.error.value),
+              ElevatedButton(
+                onPressed: controller.retry,
+                child: const Text('Retry'),
+              ),
             ],
           ),
         );
-      }),
-      bottomNavigationBar: _buildBottomNav(),
-    );
+      }
+
+      final data = controller.homeData.value;
+      if (data == null) {
+        return const Center(child: Text('No courses available at the moment.'));
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.fetchHomeData,
+        child: CustomScrollView(
+          slivers: [
+            _buildHeader(data),
+            _buildHeroBanners(data),
+            _buildActiveCourse(data),
+            _buildCategories(controller),
+            _buildPopularCourses(controller, data),
+            _buildLiveSession(data),
+            _buildCommunity(data),
+            _buildTestimonials(data),
+            _buildContact(),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildHeader(dynamic data) {
@@ -106,6 +107,45 @@ class HomeView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeroBanners(dynamic data) {
+    return SliverToBoxAdapter(
+      child: Column(
+        children: [
+          SizedBox(
+            height: 180,
+            child: PageView.builder(
+              itemCount: data.heroBanners.length,
+              itemBuilder: (context, index) {
+                final banner = data.heroBanners[index];
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: CachedNetworkImage(
+                          imageUrl: banner.image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              Container(color: Colors.grey[200]),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                        ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
       ),
     );
   }
@@ -199,7 +239,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _buildPopularCourses(dynamic data) {
+  Widget _buildPopularCourses(HomeController controller, dynamic data) {
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,60 +251,85 @@ class HomeView extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          SizedBox(
-            height: 200,
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              scrollDirection: Axis.horizontal,
-              itemCount: data.popularCourses[0].courses.length,
-              itemBuilder: (context, index) {
-                final course = data.popularCourses[0].courses[index];
-                return GestureDetector(
-                  onTap: () => Get.toNamed('/videos'),
-                  child: Container(
-                    width: 160,
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
+          Obx(() {
+            final categoryIndex = controller.selectedCategoryIndex.value;
+            final category = data.popularCourses[categoryIndex];
+            return SizedBox(
+              height: 200,
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                scrollDirection: Axis.horizontal,
+                itemCount: category.courses.length,
+                itemBuilder: (context, index) {
+                  final course = category.courses[index];
+                  return GestureDetector(
+                    onTap: () => Get.toNamed('/videos'),
+                    child: Container(
+                      width: 160,
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(15),
+                            ),
+                            child: CachedNetworkImage(
+                              imageUrl: course.image,
+                              height: 120,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) =>
+                                  Container(color: Colors.grey[200]),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    course.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 12,
+                                  color: AppColors.primary,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(15),
-                          ),
-                          child: Image.network(
-                            course.image,
-                            height: 120,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            course.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+                  );
+                },
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -378,7 +443,7 @@ class HomeView extends StatelessWidget {
                         padding: const EdgeInsets.only(right: 8.0),
                         child: CircleAvatar(
                           radius: 12,
-                          backgroundImage: NetworkImage(m.avatar),
+                          backgroundImage: CachedNetworkImageProvider(m.avatar),
                         ),
                       ),
                     ),
@@ -390,6 +455,47 @@ class HomeView extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContact() {
+    return SliverToBoxAdapter(
+      child: Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+        ),
+        child: Column(
+          children: [
+            const Text(
+              'Have any questions?',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Our team is here to help you on your learning journey.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.headset_mic),
+              label: const Text('Contact Support'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ],
         ),
@@ -437,7 +543,9 @@ class HomeView extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 15,
-                            backgroundImage: NetworkImage(t.learner.avatar),
+                            backgroundImage: CachedNetworkImageProvider(
+                              t.learner.avatar,
+                            ),
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -454,20 +562,6 @@ class HomeView extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.textSecondary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Courses'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Community'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-      ],
     );
   }
 }

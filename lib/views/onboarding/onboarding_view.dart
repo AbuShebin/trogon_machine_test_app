@@ -41,7 +41,7 @@ class OnboardingView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: Image.network(
+                          child: Image.asset(
                             content.image,
                             fit: BoxFit.contain,
                           ),

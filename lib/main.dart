@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'core/constants/storage_keys.dart';
 import 'views/onboarding/onboarding_view.dart';
-import 'views/home/home_view.dart';
+import 'views/main/main_view.dart';
+import 'views/video/video_view.dart';
+import 'views/streak/streak_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,12 +28,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C63FF)),
         useMaterial3: true,
-        fontFamily: 'Inter', // Assuming standard clean font
+        fontFamily: 'Inter',
       ),
       initialRoute: onboardingCompleted ? '/home' : '/onboarding',
       getPages: [
         GetPage(name: '/onboarding', page: () => const OnboardingView()),
-        GetPage(name: '/home', page: () => const HomeView()),
+        GetPage(name: '/home', page: () => const MainView()),
+        GetPage(name: '/videos', page: () => const VideoView()),
+        GetPage(name: '/streak', page: () => const StreakView()),
       ],
     );
   }
